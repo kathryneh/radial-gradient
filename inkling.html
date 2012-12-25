@@ -28,9 +28,8 @@ var Gradient = function(element){
     this.stops = arguments[1];
     this.sideLength = element.offsetHeight;
     var tempCircle, circleDiv;
-    var circleArray;
 
-    Gradient.prototype.drawCircle = function(id){
+    Gradient.prototype.drawCircle = function(id, color){
         circleDiv=document.createElement("div");
         circleDiv.setAttribute("id", "id_"+id);
         circleDiv.setAttribute("class", "circle");
@@ -38,43 +37,42 @@ var Gradient = function(element){
         circleDiv.style.width = (id*2)+'px';
         circleDiv.style.height = (id*2)+ 'px';
         circleDiv.style.borderRadius = (id*2)+'px';
-        circleDiv.style.backgroundColor = 'rgb('+id+','+id+','+id+')';
+        circleDiv.style.backgroundColor = 'rgb('+color+','+color+','+color+')';
         circleDiv.style.zIndex = 1000-id;
         return circleDiv;
     }
 
-    Gradient.prototype.positionAndSize = function(id){
-        //circleDiv = document.getElementById("id_"+id);
-        
-        circleDiv.style.marginLeft = (this.sideLength/2 - id)/2;
-        circleDiv.style.marginTop = (this.sideLength/2 - id)/2;
-    }
-
     Gradient.prototype.draw = function(){
-        //need to inject the parent element with divs based on stops
-        //need to do this in a gradient-like manner and go between
-        //the different stops consistently
-        //the stops will be various darknesses of rgb(stop[i],stop[i],stop[i])
-        //and they will be positioned based on stops.length
+        element.innerHTML = '';
         var sideLength = element.offsetHeight;
         var fragment = document.createDocumentFragment();
-        for (var i = 0; i < sideLength/2; i++){
-            this.circleDiv = this.drawCircle(i);
-            console.log(circleDiv);
+        var numStops = this.stops.length;
+        var numBetweenStops = (sideLength / 2) / numStops;
+        var j = 0;
+
+        if(numStops == 0) return;
+        
+        var colorIncrement = 0;
+        color = this.stops[j];
+        // if (numStops > 1){
+        //     colorIncrement = (stops[j+1]-stops[j])/numStops;
+        // }
+        for (var i = sideLength/2; i > 0; i--){
+            console.log(numBetweenStops);
+            console.log(i);
+            console.log(numStops);
+            console.log(j+1);
+            if (i%numBetweenStops == 0 && numStops > j+1){
+                colorIncrement = (this.stops[j+1]-this.stops[j])/numBetweenStops;
+                console.log(colorIncrement);
+                j++;
+            }
+            this.circleDiv = this.drawCircle(i,Math.round(color));
+            color += colorIncrement;
             fragment.appendChild(circleDiv);
         }
         this.element.appendChild(fragment);
-
-        // for (var j = 0; j < sideLength/2; i*2){
-        //     this.positionAndSize(j);
-        // }
-
     }
-
-    // Gradient.prototype.draw = function(){
-    //     var numStops = this.stops.length; 
-    //     var increment = (sideLength/2)/numStops;
-    // }
 
     Gradient.prototype.clear = function(){
         this.stops = [];
@@ -88,7 +86,7 @@ var Gradient = function(element){
     }
 
     Gradient.prototype.push = function(){
-        stops.push(arguments);
+        this.stops.push(arguments);
         this.draw();
     }
 
@@ -99,12 +97,12 @@ var Gradient = function(element){
     }
 
     Gradient.prototype.unshift = function(){
-        stops.unshift(arguments);
+        this.stops.unshift(arguments);
         this.draw();
     }
 
     Gradient.prototype.reverse = function(){
-        stops.reverse();
+        this.stops.reverse();
         this.draw();
     }
 
