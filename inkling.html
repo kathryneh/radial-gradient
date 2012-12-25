@@ -83,18 +83,26 @@ var Gradient = function (element) {
         var numStops = this.stops.length;
         var numBetweenStops = ( sideLength / 2) / numStops;
         var j = 0;
+        var k = Math.round(numBetweenStops);
 
         if(numStops == 0) return;
         
         var colorIncrement = 0;
         color = this.stops[j];
-        for (var i = sideLength / 2; i > 0; i-- ){
+        for (var i = sideLength / 2; i > 0; i--, k++){
             //enters the if statement if we're on a pivotal point 
             //or if it's the first stop in the set and we need to figure out 
             //how much to increment by
-            if ( ( i%(Math.round(numBetweenStops))==0 || i == sideLength / 2) && numStops > j+1){
+            
+            //if ( ( i%(Math.round(numBetweenStops))==0 || i == sideLength / 2) && numStops > j+1){
+            if (k == Math.round(numBetweenStops) && numStops > j+1) {  
+                //TODO: this solution is not working with multiples of three when the
+                //mod function is not working as expected and it never 
+                //increments the color. 
+                //What other ways could I change this?
                 colorIncrement = (this.stops[j+1] - this.stops[j]) / numBetweenStops;
                 j++;
+                k = 0;
             }
             this.circleDiv = this.drawCircle( i, Math.round(color));
             color += colorIncrement;
