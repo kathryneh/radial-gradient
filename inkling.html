@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Inkling Gradient Challenge</title>
+    <style type="text/css" media="screen">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #gradient {
+            position: relative;
+            margin: 0 auto;
+            width: 400px;
+            height: 400px;
+        }
+        
+        #gradient div {
+            position: absolute;
+        }
+    </style>
+        <script type="text/javascript" charset="utf-8">
+
+
+var Gradient = function(element){
+    this.element = element;
+    this.stops = arguments[1];
+    this.sideLength = element.offsetHeight;
+    var tempCircle, circleDiv;
+    var circleArray;
+
+    Gradient.prototype.drawCircle = function(id){
+        circleDiv=document.createElement("div");
+        circleDiv.setAttribute("id", "id_"+id);
+        circleDiv.setAttribute("class", "circle");
+        circleDiv.setAttribute("style", "margin:"+(this.sideLength/2 - id).toString()+'px');
+        circleDiv.style.width = (id*2)+'px';
+        circleDiv.style.height = (id*2)+ 'px';
+        circleDiv.style.borderRadius = (id*2)+'px';
+        circleDiv.style.backgroundColor = 'rgb('+id+','+id+','+id+')';
+        circleDiv.style.zIndex = 1000-id;
+        return circleDiv;
+    }
+
+    Gradient.prototype.positionAndSize = function(id){
+        //circleDiv = document.getElementById("id_"+id);
+        
+        circleDiv.style.marginLeft = (this.sideLength/2 - id)/2;
+        circleDiv.style.marginTop = (this.sideLength/2 - id)/2;
+    }
+
+    Gradient.prototype.draw = function(){
+        //need to inject the parent element with divs based on stops
+        //need to do this in a gradient-like manner and go between
+        //the different stops consistently
+        //the stops will be various darknesses of rgb(stop[i],stop[i],stop[i])
+        //and they will be positioned based on stops.length
+        var sideLength = element.offsetHeight;
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < sideLength/2; i++){
+            this.circleDiv = this.drawCircle(i);
+            console.log(circleDiv);
+            fragment.appendChild(circleDiv);
+        }
+        this.element.appendChild(fragment);
+
+        // for (var j = 0; j < sideLength/2; i*2){
+        //     this.positionAndSize(j);
+        // }
+
+    }
+
+    // Gradient.prototype.draw = function(){
+    //     var numStops = this.stops.length; 
+    //     var increment = (sideLength/2)/numStops;
+    // }
+
+    Gradient.prototype.clear = function(){
+        this.stops = [];
+        this.draw();
+    }
+
+    Gradient.prototype.pop = function(){
+        var returnStop = stops.pop();
+        this.draw()
+        return returnStop;
+    }
+
+    Gradient.prototype.push = function(){
+        stops.push(arguments);
+        this.draw();
+    }
+
+    Gradient.prototype.shift = function(){
+        var returnStop = stops.shift();
+        this.draw();
+        return returnStop;
+    }
+
+    Gradient.prototype.unshift = function(){
+        stops.unshift(arguments);
+        this.draw();
+    }
+
+    Gradient.prototype.reverse = function(){
+        stops.reverse();
+        this.draw();
+    }
+
+    Gradient.prototype.map = function(callback){
+        stops.map(callback);
+        this.draw();
+    }
+    Gradient.prototype.sort = function(callback){
+        if (callback == null){
+            this.stops.sort();
+        }
+        else{
+            this.stops.sort(callback);
+        }
+        this.draw();
+    }
+    onReady = function(){
+        var element = document.getElementById('gradient');
+        var gradient = new Gradient(element, [0, 255]);
+        gradient.draw();
+    }
+}
+    </script>
+</head>
+<body>
+    <div id="gradient"></div>
+    
+
+</body>
+</html>
