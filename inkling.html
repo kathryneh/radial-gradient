@@ -20,111 +20,196 @@
             position: absolute;
         }
     </style>
-        <script type="text/javascript" charset="utf-8">
+    <script type="text/javascript" charset="utf-8">
 
+    /* 
+       Gradient(element, [stop1, ... , stopN])
+       a Gradient object in JavaScript, 
+       which has a constructor that takes as arguments: 
+       element: an element (container in which to make a gradient) 
+       [stop1, ... , stopN]: an array of stop values (0 meaning black, 255 meaning white).
+      
+       author: Katie Hawthorne (for Inkling)
+     */
+    var Gradient = function(element){
+        this.element = element;
+        this.stops = arguments[1];
+        this.sideLength = element.offsetHeight;
+        var tempCircle, circleDiv;
+        var MAX_DIV_SIZE = 1000; //maximum div size because of z index. Change for larger. 
 
-var Gradient = function(element){
-    this.element = element;
-    this.stops = arguments[1];
-    this.sideLength = element.offsetHeight;
-    var tempCircle, circleDiv;
+        /*
+        drawCircle(int id, int color)
+        A helper function for the Gradient object which creates a div and sets
+        the required attributes including a width, height, border radius, color, 
+        and z-index.
 
-    Gradient.prototype.drawCircle = function(id, color){
-        circleDiv=document.createElement("div");
-        circleDiv.setAttribute("id", "id_"+id);
-        circleDiv.setAttribute("class", "circle");
-        circleDiv.setAttribute("style", "margin:"+(this.sideLength/2 - id).toString()+'px');
-        circleDiv.style.width = (id*2)+'px';
-        circleDiv.style.height = (id*2)+ 'px';
-        circleDiv.style.borderRadius = (id*2)+'px';
-        circleDiv.style.backgroundColor = 'rgb('+color+','+color+','+color+')';
-        circleDiv.style.zIndex = 1000-id;
-        return circleDiv;
-    }
+        id: the number of div injected into the parent element.
+            used both for setting the id (for testing purposes)
+            and also for setting the width and height.
 
-    Gradient.prototype.draw = function(){
-        element.innerHTML = '';
-        var sideLength = element.offsetHeight;
-        var fragment = document.createDocumentFragment();
-        var numStops = this.stops.length;
-        var numBetweenStops = (sideLength / 2) / numStops;
-        var j = 0;
+        color: the color (monochromatic; set for rgb values) of the given circle.
 
-        if(numStops == 0) return;
-        
-        var colorIncrement = 0;
-        color = this.stops[j];
-        // if (numStops > 1){
-        //     colorIncrement = (stops[j+1]-stops[j])/numStops;
-        // }
-        for (var i = sideLength/2; i > 0; i--){
-            console.log(numBetweenStops);
-            console.log(i);
-            console.log(numStops);
-            console.log(j+1);
-            if (i%numBetweenStops == 0 && numStops > j+1){
-                colorIncrement = (this.stops[j+1]-this.stops[j])/numBetweenStops;
-                console.log(colorIncrement);
-                j++;
+         */
+        Gradient.prototype.drawCircle = function(id, color){
+            circleDiv=document.createElement("div");
+            circleDiv.setAttribute("id", "id_"+id);
+            circleDiv.setAttribute("class", "circle");
+            circleDiv.setAttribute("style", "margin:"+(this.sideLength/2 - id).toString()+'px');
+                //the margin needs to be set so that the circle div sits in the right position
+                //within the parent
+            circleDiv.style.width = (id*2)+'px';
+            circleDiv.style.height = (id*2)+ 'px';
+            circleDiv.style.borderRadius = (id*2)+'px';
+            circleDiv.style.backgroundColor = 'rgb('+color+','+color+','+color+')';
+                //rgb craziness. There might be a better way to do this. 
+            circleDiv.style.zIndex = MAX_DIV_SIZE-id;
+            return circleDiv;
+        }
+
+        /*
+        draw()
+        (re)draws the gradient
+
+        clears out the parent element before each draw rather than trying to 
+        access the DOM and re-set attributes on each one. 
+        constructs a document fragment and assembles the child circle divs 
+        before insertion.
+         */
+        Gradient.prototype.draw = function(){
+            element.innerHTML = '';
+            var sideLength = element.offsetHeight;
+            var fragment = document.createDocumentFragment();
+            var numStops = this.stops.length;
+            var numBetweenStops = (sideLength / 2) / numStops;
+            var j = 0;
+
+            if(numStops == 0) return;
+            
+            var colorIncrement = 0;
+            color = this.stops[j];
+            for (var i = sideLength/2; i > 0; i--){
+                //enters the if statement if we're on a pivotal point 
+                //or if it's the first stop in the set and we need to figure out 
+                //how much to increment by
+                if ((i%(Math.round(numBetweenStops))==0 || i == sideLength/2) && numStops > j+1){
+                    colorIncrement = (this.stops[j+1]-this.stops[j])/numBetweenStops;
+                    j++;
+                }
+                this.circleDiv = this.drawCircle(i,Math.round(color));
+                color += colorIncrement;
+                fragment.appendChild(circleDiv);
             }
-            this.circleDiv = this.drawCircle(i,Math.round(color));
-            color += colorIncrement;
-            fragment.appendChild(circleDiv);
+            this.element.appendChild(fragment);
         }
-        this.element.appendChild(fragment);
-    }
 
-    Gradient.prototype.clear = function(){
-        this.stops = [];
-        this.draw();
-    }
+        /*
+        clear()
 
-    Gradient.prototype.pop = function(){
-        var returnStop = stops.pop();
-        this.draw()
-        return returnStop;
-    }
-
-    Gradient.prototype.push = function(){
-        this.stops.push(arguments);
-        this.draw();
-    }
-
-    Gradient.prototype.shift = function(){
-        var returnStop = stops.shift();
-        this.draw();
-        return returnStop;
-    }
-
-    Gradient.prototype.unshift = function(){
-        this.stops.unshift(arguments);
-        this.draw();
-    }
-
-    Gradient.prototype.reverse = function(){
-        this.stops.reverse();
-        this.draw();
-    }
-
-    Gradient.prototype.map = function(callback){
-        stops.map(callback);
-        this.draw();
-    }
-    Gradient.prototype.sort = function(callback){
-        if (callback == null){
-            this.stops.sort();
+        clears the array gradient and redraws the div, but simply empties
+        the div out since the number of stops == 0
+         */
+        Gradient.prototype.clear = function(){
+            this.stops = [];
+            this.draw();
         }
-        else{
-            this.stops.sort(callback);
+
+        /*
+        pop()
+
+        pops a stop off of the stop array and redraws the gradient
+        returns the last stop value. 
+         */
+        Gradient.prototype.pop = function(){
+            var returnStop = this.stops.pop();
+            this.draw()
+            return returnStop;
         }
-        this.draw();
+
+        /*
+        push(stop1, ..., stopN) 
+
+        appends given stops to the end of the gradient
+         */
+        Gradient.prototype.push = function(){
+            for (var i = 0; i < arguments.length; i++){
+                this.stops.push(arguments[i]);
+            }
+            this.draw();
+        }
+
+        /*
+        shift() 
+
+        removes and returns the ﬁrst stop.
+         */
+        Gradient.prototype.shift = function(){
+            var returnStop = this.stops.shift();
+            this.draw();
+            return returnStop;
+        }
+        /*
+        unshift(stop1, ..., stopN) 
+
+        appends given stops to the beginning of the gradient.
+         */
+        Gradient.prototype.unshift = function(){
+            for (var i = 0; i < arguments.length; i++){
+                this.stops.unshift(arguments[i]);
+            }
+            this.draw();
+        }
+
+        /*
+        reverse() 
+
+        reverse the order of all stops via simply reversing the array.
+         */
+        Gradient.prototype.reverse = function(){
+            this.stops = this.stops.reverse();
+            this.draw();
+        }
+
+        /*
+        map(callback) 
+
+        modiﬁes the gradient by calling the callback for every stop
+         */
+        Gradient.prototype.map = function(callback){
+            this.stops = this.stops.map(callback);
+            this.draw();
+        }
+
+        /*
+        sort([callback])
+
+        sorts the stops (via an optional comparison callback)
+         */
+        Gradient.prototype.sort = function(callback){
+            if (callback){     
+                this.stops = this.stops.sort(callback);
+            }
+            else{
+                this.stops = this.stops.sort();
+            }
+            this.draw();
+        }
+        
+        /* Test cases given in description: 
+            var element = document.getElementById('gradient');
+            var gradient = new Gradient(element, [0, 255]);
+            gradient.draw();
+            gradient.push(0, 255);
+            gradient.shift();
+            gradient.map(function(stop){
+                return Math.min(255, stop + 100);
+            });
+            gradient.unshift(0);
+            gradient.pop();
+            gradient.clear();
+        */
+        
     }
-    onReady = function(){
-        var element = document.getElementById('gradient');
-        var gradient = new Gradient(element, [0, 255]);
-        gradient.draw();
-    }
-}
     </script>
 </head>
 <body>
