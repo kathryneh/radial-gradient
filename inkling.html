@@ -93,13 +93,7 @@ var Gradient = function (element) {
             //enters the if statement if we're on a pivotal point 
             //or if it's the first stop in the set and we need to figure out 
             //how much to increment by
-            
-            //if ( ( i%(Math.round(numBetweenStops))==0 || i == sideLength / 2) && numStops > j+1){
             if (k == Math.round(numBetweenStops) && numStops > j+1) {  
-                //TODO: this solution is not working with multiples of three when the
-                //mod function is not working as expected and it never 
-                //increments the color. 
-                //What other ways could I change this?
                 colorIncrement = (this.stops[j+1] - this.stops[j]) / numBetweenStops;
                 j++;
                 k = 0;
@@ -197,6 +191,7 @@ var Gradient = function (element) {
         if (callback){     
             this.stops = this.stops.sort(callback);
         }
+            
         else{
             this.stops = this.stops.sort();
         }
